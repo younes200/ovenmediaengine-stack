@@ -17,12 +17,15 @@ The Stack enable WebRTC P2P streaming when it's available and also support to br
 
 Just run the command to import stack.yml into portainer web portal.
 
+```sh
   docker stack deploy -c stack.yml streaming
+```
 
 # Endpoints
 
-| Publisher | https://$DOMAIN?room=ROOM_ID |  |
+|  |  |  |
 | --- | --- | --- |
+| Publisher | https://$DOMAIN?room=ROOM_ID |  |
 | Player | https://$DOMAIN/player.html?room=ROOM_ID |   |
 | API | https://api.$DOMAIN | authorization="Basic $BASE64_ACCESS_TOKEN” |
 
