@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <style>
+        body {
+            background-color: #000;
+        }
+        .player-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #player_id {
+            --op-accent-color: red;
+        }
+	div#player_id {
+          width: 100vw;
+          height: 100vh;
+        }
+	    
+	.op-player .op-media-element-container video {
+	    left: -100% !important;
+	    top: 0 !important;
+	    height: 100% !important;
+	    width: 300% !important;
+	}
+    </style>
+
+    <!-- hls.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
+
+    <!-- dash.js -->
+    <script src="https://cdn.jsdelivr.net/npm/dashjs@3.2.1/dist/dash.all.min.js"></script>
+
+    <!-- OvenPlayer -->
+    <script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+    
+</head>
+<body>
+
+    <!-- Wrapper element for sizing or positioning the player -->
+<div class="player-wrapper">
+    <!-- OvenPlayer will be initialized inside this element. -->
+    <div id="player_id"></div>
+</div>
+
+<script>
+
+    var server= null;
+
+    var room = "stream3";
+    if(getQueryStringValue("room") !== "") room = getQueryStringValue("room");
+
+    if(window.location.protocol === 'http:')
+        server = "ws://" + window.location.hostname + ":3333/app/"+room;
+    else
+        server = "wss://websocket."+window.location.hostname+"/app/"+room;
+
+    const player = OvenPlayer.create("player_id", {
+    "autoStart": true,
+    "autoFallback": true,
+    "controls": false,
+    "expandFullScreenUI":true,
+    "mute": false,
+    "sources": [{
+        "type": "webrtc",
+        "file": server
+    }],
+    "webrtcConfig": {
+        "timeoutMaxRetry": 20,
+        "connectionTimeout": 5000,
+        "playoutDelayHint": 3
+    }
+});
+
+player.toggleFullScreen()
+
+
+function getQueryStringValue(name) {
+	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+		results = regex.exec(location.search);
+	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+</script>
+</body>
+</html>

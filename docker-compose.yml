@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  ovenmediaengine:
+    image: airensoft/ovenmediaengine:0.12.9
+    ports:
+      - 1935:1935
+      - 4000-4005:4000-4005/udp
+      - 3333:3333
+      - 3478:3478
+      - 8080:8080
+      - 9000:9000
+      - 9999:9999/udp
+      - 10006-10010:10006-10010/udp
+
+  web:
+    image: flashspys/nginx-static
+    command: [nginx-debug, "-g", "daemon off;"]
+    ports:
+      - 80:80
+    networks:
+      - web
+    volumes: 
+      - ./web:/static
+  
+      
+networks:
+  web:
+    external: true

@@ -1,0 +1,28 @@
+set daemon 20
+set log syslog
+# Web interface
+set httpd port 2812 and allow admin:KsYiGVT4
+
+check host youbuy.fr with address youbuy.fr
+  if failed
+      port 443 protocol https
+      request /
+      status = 200
+      for 2 cycles
+  then exec "/bin/slack"
+    else if succeeded then exec "/bin/slack"
+
+check host api.youbuy.fr with address api.youbuy.fr
+  if failed
+      port 443 protocol https
+      request /
+      status = 200
+      for 2 cycles
+  then exec "/bin/slack"
+    else if succeeded then exec "/bin/slack"    
+
+check device var with path /
+    if SPACE usage > 80%
+    then exec "/bin/slack"
+    else if succeeded then exec "/bin/slack"    
+EOF

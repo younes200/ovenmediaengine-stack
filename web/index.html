@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+
+    <title></title>
+    <link rel="stylesheet" href="https://cdn.usebootstrap.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+
+    <style>
+
+        body {
+            background-color: #000;
+        }
+
+        .input-group-prepend .input-group-text {
+            width: 180px;
+        }
+
+        .input-group-append .input-group-text {
+            width: 60px;
+        }
+
+        .playerWrapper {
+            background-color: #000;
+        }
+
+        .previewPlayer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        #settings {
+            display: none;
+        }
+
+        #settings-icon {
+            z-index: 1000;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="playerWrapper">
+    <video controls muted id="previewPlayer" class="previewPlayer"></video>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="videoSourceSelect">Video Source</label>
+                        </div>
+                        <select class="custom-select constraintSelect" id="videoSourceSelect">
+                            <option selected>Choose...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="videoResolutionSelect">Video Resolution</label>
+                        </div>
+                        <select class="custom-select constraintSelect" id="videoResolutionSelect">
+                            <option selected value="">Not Set</option>
+                            <!-- <option value="fhd">Full HD (1920x1080)</option> -->
+                            <option value="hd">HD (1280x720)</option>
+                            <option value="vga">VGA (640x480)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="audioSourceSelectArea" class="row mb-2">
+                <div class="col-12">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="audioSourceSelect">Audio Source</label>
+                        </div>
+                        <select class="custom-select constraintSelect" id="audioSourceSelect">
+                            <option selected>Choose...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div id="settings-icon" data-toggle="modal" data-target="#exampleModal">
+    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="cogs" class="svg-inline--fa fa-cogs fa-w-20" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="white" d="M512.1 191l-8.2 14.3c-3 5.3-9.4 7.5-15.1 5.4-11.8-4.4-22.6-10.7-32.1-18.6-4.6-3.8-5.8-10.5-2.8-15.7l8.2-14.3c-6.9-8-12.3-17.3-15.9-27.4h-16.5c-6 0-11.2-4.3-12.2-10.3-2-12-2.1-24.6 0-37.1 1-6 6.2-10.4 12.2-10.4h16.5c3.6-10.1 9-19.4 15.9-27.4l-8.2-14.3c-3-5.2-1.9-11.9 2.8-15.7 9.5-7.9 20.4-14.2 32.1-18.6 5.7-2.1 12.1.1 15.1 5.4l8.2 14.3c10.5-1.9 21.2-1.9 31.7 0L552 6.3c3-5.3 9.4-7.5 15.1-5.4 11.8 4.4 22.6 10.7 32.1 18.6 4.6 3.8 5.8 10.5 2.8 15.7l-8.2 14.3c6.9 8 12.3 17.3 15.9 27.4h16.5c6 0 11.2 4.3 12.2 10.3 2 12 2.1 24.6 0 37.1-1 6-6.2 10.4-12.2 10.4h-16.5c-3.6 10.1-9 19.4-15.9 27.4l8.2 14.3c3 5.2 1.9 11.9-2.8 15.7-9.5 7.9-20.4 14.2-32.1 18.6-5.7 2.1-12.1-.1-15.1-5.4l-8.2-14.3c-10.4 1.9-21.2 1.9-31.7 0zm-10.5-58.8c38.5 29.6 82.4-14.3 52.8-52.8-38.5-29.7-82.4 14.3-52.8 52.8zM386.3 286.1l33.7 16.8c10.1 5.8 14.5 18.1 10.5 29.1-8.9 24.2-26.4 46.4-42.6 65.8-7.4 8.9-20.2 11.1-30.3 5.3l-29.1-16.8c-16 13.7-34.6 24.6-54.9 31.7v33.6c0 11.6-8.3 21.6-19.7 23.6-24.6 4.2-50.4 4.4-75.9 0-11.5-2-20-11.9-20-23.6V418c-20.3-7.2-38.9-18-54.9-31.7L74 403c-10 5.8-22.9 3.6-30.3-5.3-16.2-19.4-33.3-41.6-42.2-65.7-4-10.9.4-23.2 10.5-29.1l33.3-16.8c-3.9-20.9-3.9-42.4 0-63.4L12 205.8c-10.1-5.8-14.6-18.1-10.5-29 8.9-24.2 26-46.4 42.2-65.8 7.4-8.9 20.2-11.1 30.3-5.3l29.1 16.8c16-13.7 34.6-24.6 54.9-31.7V57.1c0-11.5 8.2-21.5 19.6-23.5 24.6-4.2 50.5-4.4 76-.1 11.5 2 20 11.9 20 23.6v33.6c20.3 7.2 38.9 18 54.9 31.7l29.1-16.8c10-5.8 22.9-3.6 30.3 5.3 16.2 19.4 33.2 41.6 42.1 65.8 4 10.9.1 23.2-10 29.1l-33.7 16.8c3.9 21 3.9 42.5 0 63.5zm-117.6 21.1c59.2-77-28.7-164.9-105.7-105.7-59.2 77 28.7 164.9 105.7 105.7zm243.4 182.7l-8.2 14.3c-3 5.3-9.4 7.5-15.1 5.4-11.8-4.4-22.6-10.7-32.1-18.6-4.6-3.8-5.8-10.5-2.8-15.7l8.2-14.3c-6.9-8-12.3-17.3-15.9-27.4h-16.5c-6 0-11.2-4.3-12.2-10.3-2-12-2.1-24.6 0-37.1 1-6 6.2-10.4 12.2-10.4h16.5c3.6-10.1 9-19.4 15.9-27.4l-8.2-14.3c-3-5.2-1.9-11.9 2.8-15.7 9.5-7.9 20.4-14.2 32.1-18.6 5.7-2.1 12.1.1 15.1 5.4l8.2 14.3c10.5-1.9 21.2-1.9 31.7 0l8.2-14.3c3-5.3 9.4-7.5 15.1-5.4 11.8 4.4 22.6 10.7 32.1 18.6 4.6 3.8 5.8 10.5 2.8 15.7l-8.2 14.3c6.9 8 12.3 17.3 15.9 27.4h16.5c6 0 11.2 4.3 12.2 10.3 2 12 2.1 24.6 0 37.1-1 6-6.2 10.4-12.2 10.4h-16.5c-3.6 10.1-9 19.4-15.9 27.4l8.2 14.3c3 5.2 1.9 11.9-2.8 15.7-9.5 7.9-20.4 14.2-32.1 18.6-5.7 2.1-12.1-.1-15.1-5.4l-8.2-14.3c-10.4 1.9-21.2 1.9-31.7 0zM501.6 431c38.5 29.6 82.4-14.3 52.8-52.8-38.5-29.6-82.4 14.3-52.8 52.8z"></path></svg>
+</div>
+
+
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/underscore@1.12.0/underscore-min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/ovenlivekit@latest/dist/OvenLiveKit.min.js"></script>
+
+<script>
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var webRtcUrlValue= null;
+
+    var myroom = "stream3";	
+    if(getQueryStringValue("room") !== "") myroom = getQueryStringValue("room");
+
+    if(window.location.protocol === 'http:')
+        webRtcUrlValue = "ws://localhost:3333/app/"+myroom+"?direction=send";
+    else
+        webRtcUrlValue = "wss://websocket."+window.location.hostname+"/app/"+myroom+"?direction=send";
+
+    
+    let allDevices = null;
+    let input = null;
+
+    const userResolutions = {
+        vga: {
+            // width: {exact: 640}, height: {exact: 480}
+            // width: { min: 0, ideal: 640}, height: { min: 0, ideal: 480 }
+            width: {ideal: 640}, height: {ideal: 480}
+        },
+        hd: {
+            // width: {exact: 1280}, height: {exact: 720}
+            // width: { min: 640, ideal: 1280}, height: { min: 480, ideal: 720 }
+            width: {ideal: 1280}, height: {ideal: 720}
+        },
+        // fhd: {
+        //     // width: {exact: 1920}, height: {exact: 1080}
+        //     // width: { min: 1280, ideal: 1920}, height: { min: 720, ideal: 1080 }
+        //     width: {ideal: 1920}, height: {ideal: 1080}
+        // }
+    };
+
+    const displayResolutions = {
+        vga: {
+            width: 640, height: 480
+        },
+        hd: {
+            width: 1280, height: 720
+        },
+        // fhd: {
+        //     width: 1920, height: 1080
+        // }
+    };
+
+    let streamingStarted = false;
+
+    let videoElement = document.getElementById('previewPlayer');
+
+    let streamingButton = $('#streamingButton');
+    
+
+    let errorTextSpan = $('#errorText');
+
+    let webRtcUrlInput = $('#webRtcUrlInput');
+    webRtcUrlInput.val(webRtcUrlValue);
+
+    let videoSourceSelect = $('#videoSourceSelect');
+    let videoResolutionSelect = $('#videoResolutionSelect');
+    let videoBitrateInput = $('#videoBitrateInput');
+    let videoFrameInput = $('#videoFrameInput');
+    let audioSourceSelect = $('#audioSourceSelect');
+    let audioSourceSelectArea = $('#audioSourceSelectArea');
+
+    let videoResolutionSpan = $('#videoResolutionSpan');
+    let videoFrameRateSpan = $('#videoFrameRateSpan');
+    let iceStateSpan = $('#iceStateSpan');
+    let bitrateSpan = $('#bitrateSpan');
+
+
+    let savedVideoSource = localStorage.getItem('savedVideoSource');
+    let savedVideoResolution = localStorage.getItem('savedVideoResolution');
+    let savedVideoBitrate = localStorage.getItem('savedVideoBitrate');
+    let savedVideoFrame = localStorage.getItem('savedVideoFrame');
+    let savedAudioSource = localStorage.getItem('savedAudioSource');
+
+    // let settingsIcon = $('#settings-icon');
+
+
+    // settingsIcon.on('click', function () {
+    //     $("#settings").toggle();
+    // });
+
+    // if (savedWebRtcUrl) {
+    //     webRtcUrlInput.val(savedWebRtcUrl);
+    // }
+
+    // webRtcUrlInput.on('change', function () {
+    //     localStorage.setItem('savedWebRtcUrl', $(this).val());
+    // });
+
+    videoSourceSelect.on('change', function () {
+        localStorage.setItem('savedVideoSource', $(this).val());
+
+        if ($(this).val() === 'displayCapture') {
+            audioSourceSelectArea.hide();
+        } else {
+            audioSourceSelectArea.show();
+        }
+    });
+
+    videoResolutionSelect.on('change', function () {
+        localStorage.setItem('savedVideoResolution', $(this).val());
+    });
+
+    videoBitrateInput.on('change', function () {
+        localStorage.setItem('savedVideoBitrate', $(this).val());
+    });
+
+    videoFrameInput.on('change', function () {
+        localStorage.setItem('savedVideoFrame', $(this).val());
+    });
+
+    audioSourceSelect.on('change', function () {
+        localStorage.setItem('savedAudioSource', $(this).val());
+    });
+
+    $('.constraintSelect').on('change', function () {
+        stopStreaming();
+    });
+
+
+    let frameCalculatorTimer = null;
+    let totalVideoFrames = 0;
+
+    function getResolutionAndCalculateFrame(videoElement) {
+
+        if (frameCalculatorTimer) {
+
+            clearInterval(frameCalculatorTimer);
+            videoResolutionSpan.text('-');
+            videoFrameRateSpan.empty('-');
+            frameCalculatorTimer = null;
+            totalVideoFrames = 0;
+        }
+
+        frameCalculatorTimer = setInterval(function () {
+
+            videoResolutionSpan.text(videoElement.videoWidth + 'x' + videoElement.videoHeight);
+
+            if (totalVideoFrames === 0) {
+
+                totalVideoFrames = videoElement.getVideoPlaybackQuality().totalVideoFrames;
+            } else {
+
+                let currentTotalFrame = videoElement.getVideoPlaybackQuality().totalVideoFrames;
+                let frameRate = currentTotalFrame - totalVideoFrames;
+
+                videoFrameRateSpan.text(frameRate + 'fps');
+
+                totalVideoFrames = currentTotalFrame;
+            }
+
+        }, 1000);
+    }
+
+    function getUserConstraints() {
+
+        let videoDeviceId = videoSourceSelect.val();
+        let videoResolution = videoResolutionSelect.val();
+        let videoFrame = videoFrameInput.val();
+        let audioDeviceId = audioSourceSelect.val();
+
+        let newConstraint = {};
+
+        if (videoDeviceId) {
+            newConstraint.video = {
+                deviceId: {
+                    exact: videoDeviceId
+                }
+            };
+        }
+
+        if (audioDeviceId) {
+            newConstraint.audio = {
+                deviceId: {
+                    exact: audioDeviceId
+                }
+            };
+        }
+
+        if (videoResolution) {
+
+            const resolution = userResolutions[videoResolution];
+
+            newConstraint.video.width = resolution.width;
+            newConstraint.video.height = resolution.height;
+        }
+
+        if (videoFrame) {
+            newConstraint.video.frameRate = {exact: parseInt(videoFrame)};
+        }
+
+        return newConstraint;
+    }
+
+    function getDisplayConstraints() {
+
+        let videoResolution = videoResolutionSelect.val() || "hd";
+        let videoFrame = videoFrameInput.val();
+
+        let newConstraint = {};
+
+        newConstraint.video = {};
+
+        if (videoResolution) {
+
+            const resolution = displayResolutions[videoResolution];
+
+            newConstraint.video.width = resolution.width;
+            newConstraint.video.height = resolution.height;
+        } else {
+
+            newConstraint.video = true;
+        }
+
+        if (videoFrame) {
+
+            if (!newConstraint.video) {
+
+                newConstraint.video = {};
+            }
+
+            newConstraint.video.frameRate = parseInt(videoFrame);
+        }
+
+        newConstraint.audio = true;
+
+        return newConstraint;
+    }
+
+    function setDevice(type, select, devices) {
+
+        select.empty();
+
+        if (type === 'audio' && devices.length === 0) {
+
+            select.append('<option value="">No Source Available</option>')
+        } else {
+
+            _.each(devices, function (device) {
+
+                let option = $('<option></option>');
+
+                option.text(device.label);
+                option.val(device.deviceId);
+
+                select.append(option);
+            });
+
+            // if (type === 'video') {
+            //
+            //     let option = $('<option></option>');
+            //
+            //     option.text('Display capture');
+            //     option.val('displayCapture');
+            //
+            //     if (!navigator.mediaDevices.getDisplayMedia) {
+            //
+            //         option.text('Display capture (Not supported)');
+            //         option.attr('disabled', 'disabled');
+            //     }
+            //
+            //
+            //     select.append(option);
+            // }
+        }
+
+        select.find('option').eq(0).prop('selected', true);
+    }
+
+    function checkDevice(devices, deviceId) {
+
+        if (deviceId === 'displayCapture') {
+            return true;
+        }
+
+        let filtered = _.filter(devices, function (device) {
+
+            return device.deviceId === deviceId;
+        });
+
+        return filtered.length > 0;
+    }
+
+    function resetMessages() {
+
+        errorTextSpan.empty();
+
+        clearInterval(frameCalculatorTimer);
+        frameCalculatorTimer = null;
+
+
+        videoResolutionSpan.text('-');
+        videoFrameRateSpan.text('-');
+        bitrateSpan.text('-');
+        iceStateSpan.text('-');
+
+    }
+
+
+    function createInput() {
+
+        streamingButton.prop('disabled', true);
+
+        if (input) {
+            input.remove();
+            input = null;
+        }
+
+        resetMessages();
+
+        input = OvenLiveKit.create({
+            callbacks: {
+                error: function (error) {
+
+                    let errorMessage = '';
+
+                    if (error.message) {
+
+                        errorMessage = error.message;
+                    } else if (error.name) {
+
+                        errorMessage = error.name;
+                    } else {
+
+                        errorMessage = error.toString();
+                    }
+
+                    if (errorMessage === 'OverconstrainedError') {
+
+                        errorMessage = 'The input device does not support the specified resolution or frame rate.';
+                    }
+
+                    resetMessages();
+
+                    errorTextSpan.text(errorMessage);
+                },
+                connectionClosed: function (type, event) {
+                    if (type === 'websocket') {
+                        let reason;
+                        // See http://tools.ietf.org/html/rfc6455#section-7.4.1
+                        if (event.code === 1000)
+                            reason = "Normal closure, meaning that the purpose for which the connection was established has been fulfilled.";
+                        else if (event.code === 1001)
+                            reason = "An endpoint is \"going away\", such as a server going down or a browser having navigated away from a page.";
+                        else if (event.code === 1002)
+                            reason = "An endpoint is terminating the connection due to a protocol error";
+                        else if (event.code === 1003)
+                            reason = "An endpoint is terminating the connection because it has received a type of data it cannot accept (e.g., an endpoint that understands only text data MAY send this if it receives a binary message).";
+                        else if (event.code === 1004)
+                            reason = "Reserved. The specific meaning might be defined in the future.";
+                        else if (event.code === 1005)
+                            reason = "No status code was actually present.";
+                        else if (event.code === 1006)
+                            reason = "The connection was closed abnormally, e.g., without sending or receiving a Close control frame";
+                        else if (event.code === 1007)
+                            reason = "An endpoint is terminating the connection because it has received data within a message that was not consistent with the type of the message (e.g., non-UTF-8 [http://tools.ietf.org/html/rfc3629] data within a text message).";
+                        else if (event.code === 1008)
+                            reason = "An endpoint is terminating the connection because it has received a message that \"violates its policy\". This reason is given either if there is no other sutible reason, or if there is a need to hide specific details about the policy.";
+                        else if (event.code === 1009)
+                            reason = "An endpoint is terminating the connection because it has received a message that is too big for it to process.";
+                        else if (event.code === 1010) // Note that this status code is not used by the server, because it can fail the WebSocket handshake instead.
+                            reason = "An endpoint (client) is terminating the connection because it has expected the server to negotiate one or more extension, but the server didn't return them in the response message of the WebSocket handshake. <br /> Specifically, the extensions that are needed are: " + event.reason;
+                        else if (event.code === 1011)
+                            reason = "A server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.";
+                        else if (event.code === 1015)
+                            reason = "The connection was closed due to a failure to perform a TLS handshake (e.g., the server certificate can't be verified).";
+                        else
+                            reason = "Unknown reason";
+                        $('#errorText').html('Web Socket is closed. ' + reason);
+                    }
+                    if (type === 'ice') {
+                        $('#errorText').html('Peer Connection is closed. State: ' + input.peerConnection.iceConnectionState);
+                    }
+                },
+                iceStateChange: function (state) {
+                    iceStateSpan.text(state);
+                }
+            }
+        });
+
+        input.attachMedia(videoElement);
+
+        if (videoSourceSelect.val()) {
+
+            if (videoSourceSelect.val() === 'displayCapture') {
+
+
+                input.getDisplayMedia(getDisplayConstraints()).then(function (stream) {
+
+                    streamingButton.prop('disabled', false);
+                    getResolutionAndCalculateFrame(videoElement);
+                    startStreaming();
+                });
+            } else {
+
+                input.getUserMedia(getUserConstraints()).then(function (stream) {
+
+                    streamingButton.prop('disabled', false);
+                    getResolutionAndCalculateFrame(videoElement);
+                    startStreaming();
+                });
+            }
+        }
+    }
+
+    function startStreaming() {
+
+        streamingStarted = true;
+        streamingButton.removeClass('btn-primary').addClass('btn-danger');
+        streamingButton.text('Stop Streaming');
+
+        if (input) {
+
+            let connectionConfig = {};
+
+            if (videoBitrateInput.val()) {
+                connectionConfig.maxVideoBitrate = parseInt(videoBitrateInput.val());
+            }
+
+            input.startStreaming(webRtcUrlValue, connectionConfig);
+        }
+    }
+
+    function stopStreaming() {
+
+        streamingStarted = false;
+        streamingButton.removeClass('btn-danger').addClass('btn-primary');
+        streamingButton.text('Start Streaming');
+
+        if (input) {
+            createInput();
+        }
+
+    }
+
+    
+    streamingButton.on('click', function () {
+
+        if (!streamingStarted) {
+            startStreaming();
+        } else {
+            stopStreaming();
+        }
+    });
+
+    let lastResult;
+
+    setInterval(function () {
+
+        if (!input || !input.peerConnection) {
+            bitrateSpan.text('-');
+            return;
+        }
+
+        let sender = null;
+
+        input.peerConnection.getSenders().forEach(function (s) {
+
+            if (s.track && s.track.kind === 'video') {
+                sender = s;
+            }
+        });
+
+        if (!sender) {
+            bitrateSpan.text('-');
+            return;
+        }
+
+        sender.getStats().then(res => {
+            res.forEach(report => {
+                let bytes;
+                let headerBytes;
+                let packets;
+
+                if (report.type === 'outbound-rtp') {
+                    if (report.isRemote) {
+                        return;
+                    }
+
+                    const now = report.timestamp;
+                    bytes = report.bytesSent;
+                    headerBytes = report.headerBytesSent;
+
+                    packets = report.packetsSent;
+                    if (lastResult && lastResult.has(report.id)) {
+                        // calculate bitrate
+                        const bitrate = 8 * (bytes - lastResult.get(report.id).bytesSent) /
+                            (now - lastResult.get(report.id).timestamp);
+                        const headerrate = 8 * (headerBytes - lastResult.get(report.id).headerBytesSent) /
+                            (now - lastResult.get(report.id).timestamp);
+
+                        const packetsSent = packets - lastResult.get(report.id).packetsSent;
+
+                        bitrateSpan.text(bitrate.toFixed(2) + 'kbps');
+                    }
+
+                    // console.log('framesEncoded', report.framesEncoded, 'keyFramesEncoded', report.keyFramesEncoded, report.framesEncoded / report.keyFramesEncoded + '(' + report.framesPerSecond + 'fps)')
+                }
+
+                if (report.type === 'track') {
+                    // console.log(report)
+                }
+
+            });
+            lastResult = res;
+        });
+    }, 2000);
+
+
+    // get all devices at the first time
+    OvenLiveKit.getDevices().then(function (devices) {
+
+        allDevices = devices;
+        initPublisher();
+    }).catch(function (error) {
+
+        let errorMessage = '';
+
+        if (error.message) {
+
+            errorMessage = error.message;
+        } else if (error.name) {
+
+            errorMessage = error.name;
+        } else {
+
+            errorMessage = error.toString();
+        }
+
+        $('#errorText').text(errorMessage);
+    });
+
+    function initPublisher() {
+
+        if (allDevices) {
+
+            setDevice('video', videoSourceSelect, allDevices.videoinput,);
+            setDevice('audio', audioSourceSelect, allDevices.audioinput);
+
+            if (savedVideoSource && checkDevice(allDevices.videoinput, savedVideoSource)) {
+                videoSourceSelect.val(savedVideoSource);
+            }
+
+            if (savedVideoSource === 'displayCapture') {
+                audioSourceSelectArea.hide();
+            }
+
+            if (savedVideoResolution) {
+                videoResolutionSelect.val(savedVideoResolution);
+            }
+
+            if (savedVideoBitrate) {
+                videoBitrateInput.val(savedVideoBitrate);
+            }
+
+            if (savedVideoFrame) {
+                videoFrameInput.val(savedVideoFrame);
+            }
+
+            if (savedAudioSource && checkDevice(allDevices.audioinput, savedAudioSource)) {
+                audioSourceSelect.val(savedAudioSource);
+            }
+        }
+
+        createInput();
+    }
+
+    function getQueryStringValue(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+
+
+</script>
+
+</body>
+
+</html>

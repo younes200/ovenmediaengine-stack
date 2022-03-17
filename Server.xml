@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Server version="8">
+	<Name>OvenMediaEngine</Name>
+	<!-- Host type (origin/edge) -->
+	<Type>origin</Type>
+	<!-- Specify IP address to bind (* means all IPs) -->
+	<IP>*</IP>
+	<PrivacyProtection>false</PrivacyProtection>
+
+	<!-- 
+	To get the public IP address(mapped address of stun) of the local server. 
+	This is useful when OME cannot obtain a public IP from an interface, such as AWS or docker environment. 
+	If this is successful, you can use ${PublicIP} in your settings.
+	-->
+	<StunServer>stun.l.google.com:19302</StunServer>
+
+	<!-- Settings for the ports to bind -->
+	<Bind>
+		<!-- Enable this configuration if you want to use API Server -->
+		<Managers>
+			<API>
+				<Port>8081</Port>
+				<WorkerCount>1</WorkerCount>
+			</API>
+		</Managers>
+
+		<Providers>
+			<!-- Pull providers -->
+			<RTSPC>
+				<WorkerCount>1</WorkerCount>
+			</RTSPC>
+			<OVT>
+				<WorkerCount>1</WorkerCount>
+			</OVT>
+			<!-- Push providers -->
+			<RTMP>
+				<Port>1935</Port>
+				<WorkerCount>1</WorkerCount>
+			</RTMP>
+			<SRT>
+				<Port>9999</Port>
+				<WorkerCount>1</WorkerCount>
+			</SRT>
+			<MPEGTS>
+				<!--
+					Listen on port 4000~4005 (<Port>4000-4004,4005/udp</Port>)
+					This is just a demonstration to show that you can configure the port in several ways
+				-->
+				<Port>4000/udp</Port>
+			</MPEGTS>
+			<WebRTC>
+				<Signalling>
+					<Port>3333</Port>
+					<!-- If you want to use TLS, specify the TLS port -->
+					<!-- <TLSPort>3334</TLSPort> -->
+					<WorkerCount>1</WorkerCount>
+				</Signalling>
+
+				<IceCandidates>
+					<!-- 
+						If you want to stream WebRTC over TCP, specify IP:Port for TURN server.
+						This uses the TURN protocol, which delivers the stream from the built-in TURN server to the player's TURN client over TCP. 
+						For detailed information, refer https://airensoft.gitbook.io/ovenmediaengine/streaming/webrtc-publishing#webrtc-over-tcp
+					-->
+					<TcpRelay>*:3478</TcpRelay>
+					<!-- TcpForce is an option to force the use of TCP rather than UDP in WebRTC streaming. (You can omit ?transport=tcp accordingly.) If <TcpRelay> is not set, playback may fail. -->
+					<TcpForce>true</TcpForce>
+
+					<IceCandidate>*:10000/udp</IceCandidate>
+					<TcpRelayWorkerCount>1</TcpRelayWorkerCount>
+				</IceCandidates>
+			</WebRTC>
+		</Providers>
+
+		<Publishers>
+			<OVT>
+				<Port>9000</Port>
+				<WorkerCount>1</WorkerCount>
+			</OVT>
+			<HLS>
+				<Port>80</Port>
+				<!-- If you want to use TLS, specify the TLS port -->
+				<!-- <TLSPort>443</TLSPort> -->
+				<WorkerCount>1</WorkerCount>
+			</HLS>
+			<DASH>
+				<Port>80</Port>
+				<!-- If you want to use TLS, specify the TLS port -->
+				<!-- <TLSPort>443</TLSPort> -->
+				<WorkerCount>1</WorkerCount>
+			</DASH>
+			<WebRTC>
+				<Signalling>
+					<Port>3333</Port>
+					<!-- If you want to use TLS, specify the TLS port -->
+					<!-- <TLSPort>3334</TLSPort> -->
+					<WorkerCount>1</WorkerCount>
+				</Signalling>
+				<IceCandidates>
+					<!-- 
+						If you want to stream WebRTC over TCP, specify IP:Port for TURN server.
+						This uses the TURN protocol, which delivers the stream from the built-in TURN server to the player's TURN client over TCP. 
+						For detailed information, refer https://airensoft.gitbook.io/ovenmediaengine/streaming/webrtc-publishing#webrtc-over-tcp
+					-->
+					<TcpRelay>*:3478</TcpRelay>
+					<!-- TcpForce is an option to force the use of TCP rather than UDP in WebRTC streaming. (You can omit ?transport=tcp accordingly.) If <TcpRelay> is not set, playback may fail. -->
+					<TcpForce>true</TcpForce>
+
+					<IceCandidate>*:10000/udp</IceCandidate>
+					<TcpRelayWorkerCount>1</TcpRelayWorkerCount>
+				</IceCandidates>
+			</WebRTC>
+		</Publishers>
+	</Bind>
+
+	<!-- P2P works only in WebRTC -->
+	<!--
+	<P2P>
+		<MaxClientPeersPerHostPeer>2</MaxClientPeersPerHostPeer>
+	</P2P>
+	-->
+
+	<!--
+		Enable this configuration if you want to use API Server
+		
+		<AccessToken> is a token for authentication, and when you invoke the API, you must put "Basic base64encode(<AccessToken>)" in the "Authorization" header of HTTP request.
+		For example, if you set <AccessToken> to "ome-access-token", you must set "Basic b21lLWFjY2Vzcy10b2tlbg==" in the "Authorization" header.
+	-->
+	<Managers>
+		<Host>
+			<Names>
+				<Name>*</Name>
+			</Names>
+			<!--<TLS>
+				<CertPath>path/to/file.crt</CertPath>
+				<KeyPath>path/to/file.key</KeyPath>
+				<ChainCertPath>path/to/file.crt</ChainCertPath>
+			</TLS-->
+		</Host>
+		<API>
+			<AccessToken>ome-access-token</AccessToken>
+		</API>
+	</Managers>
+
+	<VirtualHosts>
+		<!-- You can use wildcard like this to include multiple XMLs -->
+		<VirtualHost include="VHost*.xml" />
+		<VirtualHost>
+			<Name>default</Name>
+			<!--Distribution is a value that can be used when grouping the same vhost distributed across multiple servers. This value is output to the events log, so you can use it to aggregate statistics. -->
+			<Distribution>ovenmediaengine.com</Distribution>
+
+			<!-- Settings for multi ip/domain and TLS -->
+			<Host>
+				<Names>
+					<!-- Host names
+						<Name>stream1.airensoft.com</Name>
+						<Name>stream2.airensoft.com</Name>
+						<Name>*.sub.airensoft.com</Name>
+						<Name>192.168.0.1</Name>
+					-->
+					<Name>*</Name>
+				</Names>
+				<!--
+				<TLS>
+					<CertPath>path/to/file.crt</CertPath>
+					<KeyPath>path/to/file.key</KeyPath>
+					<ChainCertPath>path/to/file.crt</ChainCertPath>
+				</TLS>
+				-->
+			</Host>
+
+			<!-- 	
+			Refer https://airensoft.gitbook.io/ovenmediaengine/signedpolicy
+			<SignedPolicy>
+				<PolicyQueryKeyName>policy</PolicyQueryKeyName>
+				<SignatureQueryKeyName>signature</SignatureQueryKeyName>
+				<SecretKey>aKq#1kj</SecretKey>
+
+				<Enables>
+					<Providers>rtmp,webrtc,srt</Providers>
+					<Publishers>webrtc,hls,dash,lldash</Publishers>
+				</Enables>
+			</SignedPolicy>
+			-->
+
+			<!--
+			<AdmissionWebhooks>
+				<TargetUrl></TargetUrl>
+				<SecretKey></SecretKey>
+				<Timeout>3000</Timeout>
+				<Enables>
+					<Providers>rtmp,webrtc,srt</Providers>
+					<Publishers>webrtc,hls,dash,lldash</Publishers>
+				</Enables>
+			</AdmissionWebhooks>
+			-->
+
+			<!-- <Origins>
+				<Properties>
+					<NoInputFailoverTimeout>3000</NoInputFailoverTimeout>
+					<UnusedStreamDeletionTimeout>60000</UnusedStreamDeletionTimeout>
+				</Properties>
+				<Origin>
+					<Location>/app/stream</Location>
+					<Pass>
+						<Scheme>ovt</Scheme>
+						<Urls><Url>origin.com:9000/app/stream_720p</Url></Urls>
+					</Pass>
+				</Origin>
+				<Origin>
+					<Location>/app/</Location>
+					<Pass>
+						<Scheme>ovt</Scheme>
+						<Urls><Url>origin.com:9000/app/</Url></Urls>
+					</Pass>
+				</Origin>
+				<Origin>
+					<Location>/edge/</Location>
+					<Pass>
+						<Scheme>ovt</Scheme>
+						<Urls><Url>origin.com:9000/app/</Url></Urls>
+					</Pass>
+				</Origin>
+			</Origins> -->
+			
+			<!-- Settings for applications -->
+			<Applications>
+				<Application>
+					<Name>app</Name>
+					<!-- Application type (live/vod) -->
+					<Type>live</Type>
+					<OutputProfiles>
+						<!-- Enable this configuration if you want to hardware acceleration using GPU -->
+						<HardwareAcceleration>false</HardwareAcceleration>
+						<OutputProfile>
+							<Name>bypass_stream</Name>
+							<OutputStreamName>${OriginStreamName}</OutputStreamName>
+							<Encodes>
+								<Audio>
+									<Bypass>true</Bypass>
+								</Audio>
+								<Video>
+									<Bypass>true</Bypass>
+								</Video>
+								<Audio>
+									<Codec>opus</Codec>
+									<Bitrate>128000</Bitrate>
+									<Samplerate>48000</Samplerate>
+									<Channel>2</Channel>
+								</Audio>
+							</Encodes>
+						</OutputProfile>
+
+						<OutputProfile>
+							<Name>youtube_stream</Name>
+							<OutputStreamName>${OriginStreamName}_youtube</OutputStreamName>
+							<Encodes>
+                            <Audio>
+                                <Bypass>false</Bypass>
+                                <Codec>aac</Codec>
+                                <Bitrate>128000</Bitrate>
+                                <Samplerate>48000</Samplerate>
+                                <Channel>2</Channel>
+                            </Audio>
+                            <Video>
+								<Bypass>true</Bypass>
+							</Video>
+							</Encodes>
+						</OutputProfile>
+
+						<OutputProfile>
+								<Name>facebook_stream</Name>
+								<OutputStreamName>${OriginStreamName}_facebook</OutputStreamName>
+								<Encodes>
+										<Video>
+											<Bypass>false</Bypass>
+											<Codec>h264</Codec>
+											<Bitrate>750000</Bitrate>
+											<Framerate>30.0</Framerate>
+										</Video>
+										<Audio>
+											<Bypass>false</Bypass>
+											<Codec>aac</Codec>
+											<Bitrate>128000</Bitrate>
+											<Samplerate>48000</Samplerate>
+											<Channel>2</Channel>
+										</Audio>
+								</Encodes>
+						</OutputProfile>						
+
+
+					</OutputProfiles>
+					<Providers>
+						<OVT />
+						<WebRTC />
+						<RTMP />
+						<SRT />
+						<MPEGTS>
+							<StreamMap>
+								<!--
+									Set the stream name of the client connected to the port to "stream_${Port}"
+									For example, if a client connets to port 4000, OME creates a "stream_4000" stream
+									<Stream>
+										<Name>stream_${Port}</Name>
+										<Port>4000,4001-4004</Port>
+									</Stream>
+									<Stream>
+										<Name>stream_4005</Name>
+										<Port>4005</Port>
+									</Stream>
+								-->
+								<Stream>
+									<Name>stream_${Port}</Name>
+									<Port>4000</Port>
+								</Stream>
+							</StreamMap>
+						</MPEGTS>
+						<RTSPPull />
+						<WebRTC>
+							<Timeout>30000</Timeout>
+						</WebRTC>
+					</Providers>
+					<Publishers>
+						<AppWorkerCount>1</AppWorkerCount>
+						<StreamWorkerCount>8</StreamWorkerCount>
+						<OVT />
+						<WebRTC>
+							<Timeout>30000</Timeout>
+							<Rtx>false</Rtx>
+							<Ulpfec>false</Ulpfec>
+							<JitterBuffer>false</JitterBuffer>
+						</WebRTC>
+						<HLS>
+							<SegmentDuration>5</SegmentDuration>
+							<SegmentCount>3</SegmentCount>
+							<CrossDomains>
+								<Url>*</Url>
+							</CrossDomains>
+						</HLS>
+						<DASH>
+							<SegmentDuration>5</SegmentDuration>
+							<SegmentCount>3</SegmentCount>
+							<CrossDomains>
+								<Url>*</Url>
+							</CrossDomains>
+							<!--
+								Enable DASH player to obtain UTCTiming from OME using /time?iso&ms API
+							-->
+							<UTCTiming>
+								<Scheme>urn:mpeg:dash:utc:http-xsdate:2014</Scheme>
+								<Value>/time?iso&amp;ms</Value>
+							</UTCTiming>
+						</DASH>
+						<LLDASH>
+							<SegmentDuration>5</SegmentDuration>
+							<CrossDomains>
+								<Url>*</Url>
+							</CrossDomains>
+							<!--
+								Use default options for UTCTiming
+									- scheme: urn:mpeg:dash:utc:http-xsdate:2014
+									- value: /time?iso&ms
+							-->
+							<UTCTiming />
+						</LLDASH>
+						<RTMPPush></RTMPPush>
+					
+						<FILE>
+							<RootPath>/opt/recording</RootPath>
+							<FilePath>/${Stream}-${StartTime:YYYYMMDDhhmmss}_${EndTime:YYYYMMDDhhmmss}.mp4</FilePath>
+							<InfoPath>/${Stream}.xml</InfoPath>
+						</FILE>
+
+					</Publishers>
+				</Application>
+			</Applications>
+		</VirtualHost>
+	</VirtualHosts>
+</Server>

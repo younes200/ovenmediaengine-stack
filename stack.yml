@@ -1,0 +1,102 @@
+version: "3.8"
+services:
+  reverse-proxy:
+    image: traefik:v2.5
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --log=true
+      - --log.level=ERROR
+      - --accessLog=false
+      - --certificatesResolvers.le.acme.email=${LE_ACM_EMAIL}
+      - --certificatesResolvers.le.acme.storage=/shared/acme.json
+      - --certificatesResolvers.le.acme.httpchallenge=true
+      - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --entryPoints.web.address=:80
+      - --entryPoints.websecure.address=:443
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/kzexo/traefik/:/shared
+    restart: unless-stopped
+    labels:
+      - traefik.http.routers.traefik-rtr.tls=true
+      - traefik.http.routers.traefik-rtr.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.${DOMAIN}
+      - traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.middlewares=auth
+      - traefik.http.routers.dashboard.entrypoints=websecure
+      - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_BASIC_AUTH}
+    networks:
+      - web
+
+  ovenmediaengine:
+    image: airensoft/ovenmediaengine:dev
+    restart: unless-stopped
+    ports:
+      # - 1935:1935
+      - 4000-4005:4000-4005/udp
+      - 3333:3333
+      - 3478:3478
+      - 8080:8080
+      - 9001:9000
+      - 9999:9999/udp
+      - 10006-10010:10006-10010/udp
+      - 8081:8081
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.websocket.rule=Host(`websocket.${DOMAIN}`)
+      - traefik.http.routers.websocket.tls=true
+      - traefik.http.routers.websocket.tls.certresolver=le
+      - traefik.http.routers.websocket.service=websocket
+      - traefik.http.routers.websocket.entrypoints=websecure
+      - traefik.http.services.websocket.loadbalancer.server.port=3333
+      - traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)
+      - traefik.http.routers.api.tls=true
+      - traefik.http.routers.api.tls.certresolver=le
+      - traefik.http.routers.api.service=api
+      - traefik.http.routers.api.entrypoints=websecure
+      - traefik.http.services.api.loadbalancer.server.port=8081
+    volumes:  
+    - /home/kzexo/Server.xml:/opt/ovenmediaengine/bin/origin_conf/Server.xml
+    - /home/kzexo/recording:/opt/recording
+
+  whoami:
+    image: "traefik/whoami"
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.whoami.rule=Host(`whoami.${DOMAIN}`)
+      - traefik.http.routers.whoami.tls=true
+      - traefik.http.routers.whoami.tls.certresolver=le
+      - traefik.http.routers.whoami.entrypoints=websecure
+
+  web:
+    image: ghcr.io/younes200/ovenmediaengine-stack/web:latest
+    command: [nginx-debug, "-g", "daemon off;"]
+    restart: unless-stopped
+    depends_on:
+      - ovenmediaengine
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web-app.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.web-app.tls=true
+      - traefik.http.routers.web-app.tls.certresolver=le
+      - traefik.http.routers.web-app.entrypoints=websecure
+      - traefik.http.middlewares.web-app.redirectscheme.scheme=https
+      - traefik.http.middlewares.web-app.redirectscheme.permanent=true
+
+
+networks:
+  web:
+    external: true
