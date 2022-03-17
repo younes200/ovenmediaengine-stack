@@ -6,8 +6,9 @@ The Stack enable WebRTC P2P streaming when it's available and also support to br
 
 # Environement:
 
-| DOMAIN           | main domain name, subdomaine names |
+|            |  |
 |------------------|------------------------------------|
+| DOMAIN           | main domain name, subdomaine names |
 | LE_ACM_EMAIL     | Let's encrypt ACM email            |
 | API_ACCESS_TOKEN | access token to enable API server  |
 
@@ -32,9 +33,11 @@ Usage example in iframe:
 ```
 
 
-## API 
+## API Example
 
 $API_ACCESS_TOKEN is a token for authentication, and when you invoke the API, you must put "Basic base64encode($API_ACCESS_TOKEN)" in the "Authorization" header of HTTP request.
+
+
 ### Available Streams
 
 To get available streams : 
@@ -64,7 +67,7 @@ fetch("https://$DOMAIN/v1/vhosts/default/apps/app/streams", requestOptions)
 */
 ```
 
-## Push stream to Youtube
+### Push stream to Youtube
 
 Push a selected stream to remove RTMP destination : 
 Notes that stream name most append to the name “_youtube”, example, if you your room name is “test”, stream to push to youtube will be “**test_youtube**”
@@ -97,7 +100,7 @@ fetch("https://api.$DOMAIN/v1/vhosts/default/apps/app:startPush", requestOptions
   .catch(error => console.log('error', error));
 ```
 
-# Push stream to Facebook
+### Push stream to Facebook
 
 For facebook **RTMPS,** use this payload instead **:** 
 
@@ -113,7 +116,7 @@ For facebook **RTMPS,** use this payload instead **:**
 }
 ```
 
-# Stop pushed stream :
+### top pushed stream :
 
 ```jsx
 var headers = new Headers();
@@ -137,7 +140,7 @@ fetch("https://api.$DOMAIN/v1/vhosts/default/apps/app:stopPush", requestOptions)
   .catch(error => console.log('error', error));
 ```
 
-# List Pushed streams :
+### List Pushed streams :
 
 ```jsx
 var myHeaders = new Headers();
@@ -186,7 +189,7 @@ fetch("https://api.$DOMAIN/v1/vhosts/default/apps/app:pushes", requestOptions)
 */
 ```
 
-# List recording
+### List recording
 
 To list exiting or ongoing recording session :
 
@@ -238,7 +241,7 @@ fetch("https://api.$DOMAIN/v1/vhosts/default/apps/app:records", requestOptions)
 */
 ```
 
-# Start a recording
+### Start a recording
 
 ```jsx
 var headers = new Headers();
@@ -267,7 +270,7 @@ fetch("https://api.$DOMAIN/v1/vhosts/default/apps/app:startRecord", requestOptio
 
 Videos will be recorded in /home/kzexo/recording
 
-# Stop a recording
+### Stop a recording
 
 ```jsx
 var headers = new Headers();
