@@ -6,7 +6,7 @@ The Stack enable WebRTC P2P streaming when it's available and also support to br
 
 # Environement:
 
-|            |  |
+|     ENV       |  |
 |------------------|------------------------------------|
 | DOMAIN           | main domain name, subdomaine names |
 | LE_ACM_EMAIL     | Let's encrypt ACM email            |
@@ -23,7 +23,7 @@ Just run the command to import stack.yml into portainer web portal.
 
 # Endpoints
 
-|  |  |  |
+| TYPE  |  |  |
 | --- | --- | --- |
 | Publisher | https://$DOMAIN?room=ROOM_ID |  |
 | Player | https://$DOMAIN/player.html?room=ROOM_ID |   |
