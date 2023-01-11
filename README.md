@@ -1,6 +1,6 @@
 # Live Streaming Server Docker Stack 📺 🎙️
 
-Production ready Docker Stack based on excelent [OvenMediaEngine](https://www.ovenmediaengine.com/ome), Traefik reverse proxy [Traefik](https://traefik.io) to create your own platforms/services that live stream to large audiences on Web, Mobile.
+Production ready Docker Stack based on [OvenMediaEngine](https://www.ovenmediaengine.com/ome), Traefik reverse proxy [Traefik](https://traefik.io) to create your own platforms that live stream to large audiences on Web, Mobile and more.
 The Stack enable WebRTC P2P streaming when it's available and also support to broadcast stream to Facebook, Youtube Live Channels.
 
 
